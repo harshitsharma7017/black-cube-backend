@@ -1,8 +1,39 @@
 import { Request, Response, NextFunction } from 'express';
 import { RecordService } from '../services/record.service';
-import { queryRecordsSchema, updateRecordSchema } from '../validators/record.validator';
+import { queryRecordsSchema, updateRecordSchema, bulkDeleteSchema, bulkUpdateSchema } from '../validators/record.validator';
 
 export class RecordController {
+  static async bulkDeleteRecords(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = bulkDeleteSchema.parse(req.body);
+      const result = await RecordService.bulkDeleteRecords(data.ids);
+      res.json({ data: { deletedCount: result.deletedCount }, error: null, meta: null });
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        res.status(400).json({
+          error: { code: "VALIDATION_ERROR", message: "Invalid bulk delete data", details: error.errors },
+        });
+        return;
+      }
+      next(error);
+    }
+  }
+
+  static async bulkUpdateRecords(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = bulkUpdateSchema.parse(req.body);
+      const result = await RecordService.bulkUpdateRecords(data.ids, data.updates);
+      res.json({ data: { modifiedCount: result.modifiedCount }, error: null, meta: null });
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        res.status(400).json({
+          error: { code: "VALIDATION_ERROR", message: "Invalid bulk update data", details: error.errors },
+        });
+        return;
+      }
+      next(error);
+    }
+  }
   static async getRecords(req: Request, res: Response, next: NextFunction) {
     try {
       // Validate query params

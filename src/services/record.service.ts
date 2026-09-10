@@ -4,6 +4,19 @@ import { QueryRecordsInput, UpdateRecordInput } from '../validators/record.valid
 
 export class RecordService {
   /**
+   * Bulk delete records by IDs
+   */
+  static async bulkDeleteRecords(ids: string[]) {
+    return RecordModel.deleteMany({ _id: { $in: ids } });
+  }
+
+  /**
+   * Bulk update records by IDs
+   */
+  static async bulkUpdateRecords(ids: string[], updates: Partial<UpdateRecordInput>) {
+    return RecordModel.updateMany({ _id: { $in: ids } }, { $set: updates }, { runValidators: true });
+  }
+  /**
    * Fetch paginated and filtered records
    */
   static async getRecords(query: QueryRecordsInput) {
@@ -46,8 +59,13 @@ export class RecordService {
     const pageSize = Math.max(1, query.pageSize);
     const skip = (page - 1) * pageSize;
 
+    // Build sort: user-specified field + stable secondary sort on _id
+    const sortField = query.sortBy ?? 'dateAdded';
+    const sortDir: 1 | -1 = query.sortOrder === 'asc' ? 1 : -1;
+    const sort: Record<string, 1 | -1> = { [sortField]: sortDir, _id: sortDir };
+
     const [items, total] = await Promise.all([
-      RecordModel.find(filter).sort({ dateAdded: -1 }).skip(skip).limit(pageSize),
+      RecordModel.find(filter).sort(sort).skip(skip).limit(pageSize),
       RecordModel.countDocuments(filter),
     ]);
 

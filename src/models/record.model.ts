@@ -90,5 +90,6 @@ recordSchema.index({ type: 1, dateAdded: -1 });
 recordSchema.index({ linkStatus: 1, dateAdded: -1 });
 recordSchema.index({ downloadStatus: 1, dateAdded: -1 });
 recordSchema.index({ dateAdded: -1 });
+recordSchema.index({ name: 1, _id: 1 });
 
 export const RecordModel: Model<IRecord> = mongoose.model<IRecord>('Record', recordSchema);

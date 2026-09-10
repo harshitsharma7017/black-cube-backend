@@ -28,8 +28,35 @@ export const queryRecordsSchema = z.object({
   downloadStatus: z.string().optional(),
   dateFrom: z.string().datetime().optional(),
   dateTo: z.string().datetime().optional(),
+  sortBy: z.enum([
+    'name', 'email', 'phoneNumber', 'address',
+    'organisation', 'type', 'linkStatus',
+    'downloadStatus', 'dateAdded',
+  ]).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
 export type CreateRecordInput = z.infer<typeof createRecordSchema>;
 export type UpdateRecordInput = z.infer<typeof updateRecordSchema>;
 export type QueryRecordsInput = z.infer<typeof queryRecordsSchema>;
+
+// For DELETE /api/records/bulk
+export const bulkDeleteSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1, "At least one ID is required"),
+});
+
+// For PATCH /api/records/bulk
+export const bulkUpdateSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1, "At least one ID is required"),
+  updates: z.object({
+    type: z.enum(RECORD_TYPES).optional(),
+    linkStatus: z.enum(LINK_STATUSES).optional(),
+    downloadStatus: z.enum(DOWNLOAD_STATUSES).optional(),
+  }).strict().refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field must be updated",
+  }),
+});
+
+export type BulkDeleteInput = z.infer<typeof bulkDeleteSchema>;
+export type BulkUpdateInput = z.infer<typeof bulkUpdateSchema>;
+
