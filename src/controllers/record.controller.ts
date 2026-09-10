@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { RecordService } from '../services/record.service';
-import { queryRecordsSchema, updateRecordSchema, bulkDeleteSchema, bulkUpdateSchema } from '../validators/record.validator';
-
+import { queryRecordsSchema, updateRecordSchema, bulkDeleteSchema, bulkUpdateSchema, exportRecordsSchema } from '../validators/record.validator';
+import * as xlsx from 'xlsx';
+import { AuditLogService } from '../services/audit-log.service';
 export class RecordController {
   static async bulkDeleteRecords(req: Request, res: Response, next: NextFunction) {
     try {

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { RecordModel, IRecord, RECORD_TYPES } from '../models/record.model';
-import { QueryRecordsInput, UpdateRecordInput } from '../validators/record.validator';
+import { QueryRecordsInput, UpdateRecordInput, ExportRecordsInput } from '../validators/record.validator';
 import { AuditLogService } from './audit-log.service';
 
 export class RecordService {
