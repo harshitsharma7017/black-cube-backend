@@ -4,6 +4,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import recordRoutes from './routes/record.routes';
 import summaryRoutes from './routes/summary.routes';
+import historyRoutes from './routes/history.routes';
 import importRoutes from './routes/import.routes';
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/health', healthRoutes);
 app.use('/api/records', recordRoutes);
 app.use('/api/summary', summaryRoutes);
+app.use('/api', historyRoutes);
 app.use('/api/import', importRoutes);
 
 // Error Handling

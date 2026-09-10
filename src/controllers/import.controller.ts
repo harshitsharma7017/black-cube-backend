@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { ImportService } from '../services/import.service';
 import { importCommitSchema } from '../validators/import.validator';
+import { ImportHistoryService } from '../services/import-history.service';
+import { AuditLogService } from '../services/audit-log.service';
 
 export class ImportController {
   /**
@@ -74,7 +76,9 @@ export class ImportController {
         return;
       }
 
-      const validRows = parseResult.data;
+      const { fileName, totalRows, validRows } = parseResult.data;
+      const failedRows = totalRows - validRows.length;
+      let status: "Completed" | "Completed with Errors" | "Failed" = failedRows > 0 ? "Completed with Errors" : "Completed";
 
       if (validRows.length === 0) {
         res.status(422).json({
@@ -87,6 +91,21 @@ export class ImportController {
       }
 
       const result = await ImportService.persistRows(validRows);
+      
+      await ImportHistoryService.logImport({
+        fileName,
+        totalRows,
+        importedRows: result.inserted,
+        failedRows,
+        status
+      });
+
+      await AuditLogService.logAction({
+        action: "IMPORT",
+        entityType: "Record",
+        entityId: "bulk-import",
+        details: { fileName, importedRows: result.inserted, failedRows }
+      });
 
       res.status(201).json({
         data: { inserted: result.inserted },

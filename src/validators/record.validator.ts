@@ -60,3 +60,9 @@ export const bulkUpdateSchema = z.object({
 export type BulkDeleteInput = z.infer<typeof bulkDeleteSchema>;
 export type BulkUpdateInput = z.infer<typeof bulkUpdateSchema>;
 
+
+// For GET /api/records/export query parameters
+export const exportRecordsSchema = queryRecordsSchema.omit({ page: true, pageSize: true }).extend({
+  format: z.enum(["csv", "xlsx"]),
+});
+export type ExportRecordsInput = z.infer<typeof exportRecordsSchema>;

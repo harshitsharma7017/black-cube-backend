@@ -40,4 +40,8 @@ export type ImportRowInput = z.infer<typeof importRowSchema>;
 /**
  * Schema for validating the entire import commit body (array of rows).
  */
-export const importCommitSchema = z.array(importRowSchema).min(1, 'At least one valid row is required');
+export const importCommitSchema = z.object({
+  fileName: z.string().min(1, "File name is required"),
+  totalRows: z.number().min(1, "Total rows must be at least 1"),
+  validRows: z.array(importRowSchema).min(1, "At least one valid row is required"),
+});

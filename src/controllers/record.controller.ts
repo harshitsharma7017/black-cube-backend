@@ -34,6 +34,76 @@ export class RecordController {
       next(error);
     }
   }
+  
+  static async exportRecords(req: Request, res: Response, next: NextFunction) {
+    try {
+      const query = exportRecordsSchema.parse(req.query);
+      const items = await RecordService.getAllRecordsForExport(query);
+
+      if (items.length === 0) {
+        res.status(404).json({
+          error: {
+            code: "NOT_FOUND",
+            message: "No records found matching criteria",
+          },
+        });
+        return;
+      }
+
+      const mapped = items.map((item, index) => ({
+        "S.N.": index + 1,
+        "Name": item.name,
+        "Email": item.email || "",
+        "Phone No.": item.phoneNumber || "",
+        "Address": item.address || "",
+        "Organisation": item.organisation || "",
+        "Type": item.type,
+        "Link Status": item.linkStatus,
+        "Download Status": item.downloadStatus,
+        "Added On": item.dateAdded ? new Date(item.dateAdded).toLocaleString("en-GB") : "",
+        "Record ID": item._id.toString()
+      }));
+
+      const wb = xlsx.utils.book_new();
+      const ws = xlsx.utils.json_to_sheet(mapped);
+      xlsx.utils.book_append_sheet(wb, ws, "Records");
+
+      const dateStr = new Date().toISOString().split("T")[0];
+      const filename = `manage-data-${dateStr}.${query.format}`;
+
+      if (query.format === "csv") {
+        const csvStr = xlsx.write(wb, { type: "buffer", bookType: "csv" });
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        res.send(csvStr);
+      } else {
+        const excelBuffer = xlsx.write(wb, { type: "buffer", bookType: "xlsx" });
+        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        res.send(excelBuffer);
+      }
+
+      await AuditLogService.logAction({
+        action: "EXPORT",
+        entityId: "bulk-export",
+        details: { format: query.format, count: mapped.length, filters: query }
+      });
+      
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        res.status(400).json({
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Invalid query parameters",
+            details: error.errors,
+          },
+        });
+        return;
+      }
+      next(error);
+    }
+  }
+
   static async getRecords(req: Request, res: Response, next: NextFunction) {
     try {
       // Validate query params
