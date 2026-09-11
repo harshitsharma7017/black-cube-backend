@@ -4,12 +4,12 @@ dotenv.config();
 import app from './app';
 import { connectDB } from './config/db';
 
-const PORT = process.env.PORT || 8080;
+const PORT = Number(process.env.PORT) || 8080;
 
 const startServer = async () => {
   try {
     // Start listening first so Cloud Run can detect the container.
-    app.listen(PORT, async () => {
+    app.listen(PORT, '0.0.0.0', async () => {
       console.log(
         `Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`,
       );
