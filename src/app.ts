@@ -2,6 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+
 import healthRoutes from './routes/health';
 import recordRoutes from './routes/record.routes';
 import summaryRoutes from './routes/summary.routes';
@@ -12,7 +13,13 @@ import importRoutes from './routes/import.routes';
 const app = express();
 
 // Middleware
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || '*', credentials: true }));
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
