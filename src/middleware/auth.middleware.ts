@@ -17,7 +17,8 @@ declare global {
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = req.cookies.token;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : undefined;
     if (!token) {
       res.status(401).json({ error: { code: "UNAUTHORIZED", message: "Not authenticated" } });
       return;

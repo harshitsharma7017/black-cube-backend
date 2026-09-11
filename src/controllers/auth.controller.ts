@@ -76,12 +76,7 @@ export class AuthController {
 
       const token = jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET || "fallback_secret", { expiresIn: "1d" });
       
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 24 * 60 * 60 * 1000 // 1 day
-      });
+      
 
       await AuditLogService.logAction({
         action: "SIGN_IN",
@@ -90,7 +85,7 @@ export class AuthController {
         actor: { id: user._id.toString(), name: user.name, email: user.email }
       });
 
-      res.json({ data: { success: true }, error: null, meta: null });
+      res.json({ data: { success: true, token }, error: null, meta: null });
     } catch (error: any) {
       if (error.name === "ZodError") {
         res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "Invalid input", details: error.errors } });
@@ -110,12 +105,8 @@ export class AuthController {
           actor: req.user
         });
       }
-      res.clearCookie("token", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict"
-      });
-      res.json({ data: { success: true }, error: null, meta: null });
+      
+      res.json({ data: { success: true, token }, error: null, meta: null });
     } catch (error) {
       next(error);
     }
