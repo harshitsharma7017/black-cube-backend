@@ -7,7 +7,10 @@ export const AUDIT_ACTIONS = [
   "BULK_UPDATE",
   "BULK_DELETE",
   "IMPORT",
-  "EXPORT"
+  "EXPORT",
+  "SIGN_UP",
+  "SIGN_IN",
+  "SIGN_OUT"
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -16,6 +19,9 @@ export interface IAuditLog extends Document {
   entityType: string;
   entityId: string;
   details: any;
+  actorId?: string;
+  actorName?: string;
+  actorEmail?: string;
   createdAt: Date;
 }
 
@@ -25,6 +31,9 @@ const AuditLogSchema = new Schema<IAuditLog>(
     entityType: { type: String, required: true, default: "Record" },
     entityId: { type: String, required: true },
     details: { type: Schema.Types.Mixed },
+    actorId: { type: String },
+    actorName: { type: String },
+    actorEmail: { type: String },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );

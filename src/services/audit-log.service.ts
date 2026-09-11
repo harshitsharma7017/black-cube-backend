@@ -6,12 +6,16 @@ export class AuditLogService {
     entityType?: string;
     entityId: string;
     details?: any;
+    actor?: { id: string; name: string; email: string };
   }): Promise<IAuditLog> {
     const log = new AuditLogModel({
       action: data.action,
       entityType: data.entityType || "Record",
       entityId: data.entityId,
       details: data.details,
+      actorId: data.actor?.id,
+      actorName: data.actor?.name,
+      actorEmail: data.actor?.email,
     });
     return log.save();
   }
