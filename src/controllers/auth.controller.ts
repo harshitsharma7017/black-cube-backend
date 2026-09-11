@@ -106,7 +106,7 @@ export class AuthController {
         });
       }
       
-      res.json({ data: { success: true, token }, error: null, meta: null });
+      res.json({ data: { success: true }, error: null, meta: null });
     } catch (error) {
       next(error);
     }
